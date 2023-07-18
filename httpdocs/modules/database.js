@@ -1,5 +1,6 @@
 import { normalize } from './retrosantander.js'
 import { labels } from '../modules/labels.js'
+import apiService from '../modules/apiService.js' // Asegúrate de que esta ruta es correcta
 
 // Umbral de confianza en la visión artificial.
 // Los objetos detectados por debajo de éste umbral serán ignorados.
@@ -33,15 +34,14 @@ const database = {
   records: [],
 
   // Carga en `this.records` el fichero JSON con los datos.
-  load: async (url) => {
-    const response = await fetch(url)
-    const json = await response.json()
-
-    database.records = json.map((item) => ({
+  load: async (page) => {
+    const images = await apiService.fetchImages(page + 1)
+    const newRecords = images.map((item) => ({
       ...item,
       title: prettify(item.title),
-      index: normalize(item.title.concat(' ').concat(item.caption)),
     }))
+
+    return newRecords
   },
 
   // Retorna el número de registros en la base de datos.
@@ -50,8 +50,16 @@ const database = {
   },
 
   // Devuelve el registro de una imagen a partir de su `id`.
-  find: (id) => {
-    return database.records.find((item) => item.id === id)
+  find: async (id) => {
+    const record = await database.records.find((item) => item.id === id)
+    if (record) {
+      return record
+    } else {
+      // Hay que buscarlo en la base de datos
+      const newRecord = await apiService.fetchImageById(id)
+      newRecord[title] = prettify(newRecord.title)
+      database.records.push(newRecord)
+    }
   },
 
   // Devuelve un registro en particular a partir de su `id` y varias imágenes más.
@@ -67,7 +75,7 @@ const database = {
 
   // Cursa una búsqueda en la base de datos y devuelve los resultados de la misma
   // y las sugerencias de búsqueda para el término empleado.
-  search: (string) => {
+  search: async (string) => {
     const query = normalize(string)
 
     if (!query.length) {
@@ -76,19 +84,15 @@ const database = {
       return { results, suggestions }
     }
 
-    const regexp = new RegExp(query)
-    const results = database.records.filter((item) => item.index.match(regexp))
+    const { results, suggestions } = await apiService.searchImages(query)
 
-    const suggestions = results
-      .flatMap((item) =>
-        item.index
-          .split(' ')
-          .filter((word) => word.match(new RegExp(`^${query}`)))
-          .filter((word) => word.length)
-      )
-      .filter((value, index, word) => word.indexOf(value) === index)
-      .filter((word) => word !== query)
-      .slice(0, maxSuggestions)
+    results.forEach((result) => {
+      // Comprobar si el resultado ya está en database.records para evitar duplicados
+      if (!database.records.find((record) => record.id === result.id)) {
+        result[title] = result.title
+        database.records.push(result)
+      }
+    })
 
     return { results, suggestions }
   },

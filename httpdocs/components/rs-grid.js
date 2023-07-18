@@ -71,7 +71,7 @@ customElements.define(
     ready = false
     itemsPerPage = 25
     frequency = 150
-    page = 0
+    page = 1
     scale = 1
     padding
 
@@ -94,7 +94,7 @@ customElements.define(
 
       this.container.addEventListener('mouseover', async (event) => {
         const id = event.target.getAttribute('id')
-        app.title = id ? database.find(id).title : ''
+        app.title = id ? (await database.find(id)).title : ''
       })
 
       this.container.addEventListener('click', async (event) => {
@@ -119,7 +119,7 @@ customElements.define(
         const url = app.project.details(id)
         const { areas, faces, objects, tags } = await database.parse(url)
 
-        const details = database.find(id)
+        const details = await database.find(id)
 
         image.areas = areas
         app.panel = { details, faces, objects, tags }
@@ -151,7 +151,7 @@ customElements.define(
       this.append(++this.page)
     }
 
-    append(page = 0) {
+    async append(page = 0) {
       this.ready = false
       this.page = page
       if (page > 0) {
@@ -163,9 +163,12 @@ customElements.define(
         this.clear()
       }
 
-      const start = page * this.itemsPerPage
-      const end = (1 + page) * this.itemsPerPage
-      const newImages = app.results.slice(start, end).map((result) => result.id)
+      //const start = page * this.itemsPerPage
+      //const end = (1 + page) * this.itemsPerPage
+      //const newImages = app.results.slice(start, end).map((result) => result.id)
+
+      const response = await database.load(page)
+      const newImages = response.map((result) => result.id)
 
       if (!newImages.length) {
         return
@@ -178,7 +181,7 @@ customElements.define(
         rsImage.classList.add('hidden')
 
         rsImage.addEventListener('rsImageLoaded', async (event) => {
-          const details = database.find(event.detail.id)
+          const details = await database.find(event.detail.id)
           const image = rsImage.shadowRoot.querySelector('img')
           image.setAttribute('alt', escape(details.title))
         })

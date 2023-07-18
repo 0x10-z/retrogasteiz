@@ -17,12 +17,18 @@
     "singleQuote": true
   },
   "scripts": {
-    "retrogasteiz": "cp httpdocs/retrogasteiz/index.html index.html && PROJECT=retrogasteiz npm run serve",
-    "retro-debug": "cp httpdocs/retrogasteiz/index.html index.html && PROJECT=retro-debug npm run serve",
-    "serve": "live-server --host=${PROJECT} --entry-file=${PROJECT}/index.html httpdocs"
+    "retrogasteiz": "cp httpdocs/retrogasteiz/index.html httpdocs/index.html && PROJECT=retrogasteiz npm run serve",
+    "retro-debug": "cp httpdocs/retrogasteiz/index.html httpdocs/index.html && PROJECT=retro-debug npm run serve",
+    "serve-old": "live-server --host=${PROJECT} --entry-file=${PROJECT}/index.html httpdocs",
+    "serve": "PROJECT=${PROJECT} nodemon src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sequelize": "^6.32.1",
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
-    "live-server": "^1.1.0",
+    "nodemon": "^3.0.1",
     "prettier": "^2.7.1"
   }
 }

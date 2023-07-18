@@ -113,7 +113,7 @@ const app = {
     grid.activeLayer = layer
 
     const id = this.selected.getAttribute('id')
-    const record = database.find(id)
+    const record = await database.find(id)
     this.title = layer ? grid.activeLayer : record.title
   },
 
@@ -149,8 +149,8 @@ const app = {
   },
 
   // Lanza una búsqueda del término existente en `this.query`.
-  search() {
-    const { results, suggestions } = database.search(this.query)
+  async search() {
+    const { results, suggestions } = await database.search(this.query)
 
     search.suggestions = suggestions
 
@@ -208,7 +208,7 @@ logo.innerHTML = app.project.logo
   help.innerHTML = await response.text()
 })()
 
-await database.load(app.project.database)
+database.records.push(...(await database.load(0)))
 
 // Inicializa la aplicación.
 const url = new URL(document.location.href)
