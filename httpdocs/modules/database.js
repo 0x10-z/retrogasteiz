@@ -1,6 +1,6 @@
 import { normalize } from './retrosantander.js'
 import { labels } from '../modules/labels.js'
-import apiService from '../modules/apiService.js' // Asegúrate de que esta ruta es correcta
+import apiService from '../modules/apiService.mock.js' // Asegúrate de que esta ruta es correcta
 
 // Umbral de confianza en la visión artificial.
 // Los objetos detectados por debajo de éste umbral serán ignorados.
@@ -41,12 +41,13 @@ const database = {
       title: prettify(item.title),
     }))
 
+    database.records.push(...newRecords)
     return newRecords
   },
 
   // Retorna el número de registros en la base de datos.
-  get count() {
-    return this.records.length
+  count: async () => {
+    return await apiService.fetchImagesCount()
   },
 
   // Devuelve el registro de una imagen a partir de su `id`.
@@ -56,21 +57,36 @@ const database = {
       return record
     } else {
       // Hay que buscarlo en la base de datos
-      const newRecord = await apiService.fetchImageById(id)
-      newRecord[title] = prettify(newRecord.title)
-      database.records.push(newRecord)
+      const { page, image } = await apiService.fetchImageById(id)
+      if (image) {
+        record['title'] = prettify(record.title)
+        database.records.push(record)
+        return record
+      } else {
+        return null
+      }
     }
   },
 
   // Devuelve un registro en particular a partir de su `id` y varias imágenes más.
-  firstAndSome: (id) => {
-    const index = database.records.findIndex((item) => item.id === id)
-
-    if (index === -1) {
-      throw new Error('No se encontró el registro con el id proporcionado')
+  firstAndSome: async (id) => {
+    let foundRecord = null
+    let moreImages = []
+    foundRecord = await database.records.find((item) => item.id === id)
+    if (foundRecord === null || foundRecord === undefined) {
+      // Hay que buscarlo en la base de datos
+      const { page, image } = await apiService.fetchImageById(id)
+      moreImages = await apiService.fetchImages(page)
+      foundRecord = image
+      if (foundRecord) {
+        foundRecord['title'] = prettify(foundRecord.title)
+      } else {
+        return null
+      }
     }
 
-    return database.records.slice(index, index + 26)
+    database.records = [foundRecord, ...moreImages]
+    return database.records
   },
 
   // Cursa una búsqueda en la base de datos y devuelve los resultados de la misma
@@ -89,7 +105,7 @@ const database = {
     results.forEach((result) => {
       // Comprobar si el resultado ya está en database.records para evitar duplicados
       if (!database.records.find((record) => record.id === result.id)) {
-        result[title] = result.title
+        result['title'] = result.title
         database.records.push(result)
       }
     })

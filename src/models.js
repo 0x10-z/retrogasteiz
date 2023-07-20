@@ -9,20 +9,21 @@ class ImageMetadata extends Model {
   static _formatImageModel(imageModel) {
     const image = imageModel.toJSON()
 
+    image.id = image.raw_name
     image.title = image.PictureRecord.title
-    image.caption = image.PictureRecord.caption
+    image.caption = image.PictureRecord.description
     image.license = image.PictureRecord.license
 
     const split_permalink = image.PictureRecord.permalink.split('/')
     image.permalink = split_permalink[split_permalink.length - 1]
     delete image.PictureRecord
-
+    delete image.raw_name
     return image
   }
 
   static async search(searchText, offset = 0, limit = 25) {
     const imageModels = await this.findAll({
-      attributes: [['raw_name', 'id']],
+      attributes: ['raw_name', 'id'],
       include: [
         {
           model: PictureRecord,
@@ -51,42 +52,42 @@ class ImageMetadata extends Model {
   }
 
   static async getImage(id) {
+    let page = 1
+    const pageSize = 25
+
     const imageModel = await this.findOne({
       where: { raw_name: id },
-      attributes: [['raw_name', 'id']],
+      attributes: ['id', 'raw_name'],
       include: [
         {
           model: PictureRecord,
           as: 'PictureRecord',
-          attributes: [
-            ['title', 'title'],
-            ['description', 'caption'],
-            ['permalink', 'permalink'],
-            ['license', 'license'],
-            ['permalink', 'permalink'],
-          ],
+          attributes: ['title', 'description', 'permalink', 'license'],
           required: true,
         },
       ],
     })
 
-    return imageModel ? ImageMetadata._formatImageModel(imageModel) : null
+    const imageIndex = imageModel.id
+    if (imageIndex) {
+      page = Math.ceil(imageIndex / pageSize)
+    }
+
+    if (!imageModel) {
+      return []
+    }
+
+    return { page: page, image: ImageMetadata._formatImageModel(imageModel) }
   }
 
   static async getImages(offset = 0, limit = 25) {
     const imageModels = await this.findAll({
-      attributes: [['raw_name', 'id']],
+      attributes: ['id', 'raw_name'],
       include: [
         {
           model: PictureRecord,
           as: 'PictureRecord',
-          attributes: [
-            ['title', 'title'],
-            ['description', 'caption'],
-            ['permalink', 'permalink'],
-            ['license', 'license'],
-            ['permalink', 'permalink'],
-          ],
+          attributes: ['title', 'description', 'permalink', 'license'],
           required: true,
         },
       ],
@@ -125,10 +126,7 @@ ImageMetadata.init(
 class PictureRecord extends Model {
   static async getSearchIndex() {
     const pictureRecords = await this.findAll({
-      attributes: [
-        ['title', 'title'],
-        ['description', 'caption'],
-      ],
+      attributes: ['title', 'description'],
     })
 
     let index = new Set()

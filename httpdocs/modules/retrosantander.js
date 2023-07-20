@@ -123,8 +123,8 @@ const app = {
   },
 
   // Muestra la imágen con el ID existente en `this.permalink`.
-  searchImage() {
-    const results = database.firstAndSome(app.permalink)
+  async searchImage() {
+    const results = await database.firstAndSome(app.permalink)
 
     this.results = results
 
@@ -208,15 +208,15 @@ logo.innerHTML = app.project.logo
   help.innerHTML = await response.text()
 })()
 
-database.records.push(...(await database.load(0)))
-
 // Inicializa la aplicación.
 const url = new URL(document.location.href)
-const count = database.count.toLocaleString()
+const count = (await database.count()).toLocaleString()
 
 const query = url.searchParams.get('q')
 const photoId = url.searchParams.get('i')
-const page = parseInt(url.searchParams.get('p'))
+const page = parseInt(url.searchParams.get('p')) || 0
+
+database.records.push(...(await database.load(page)))
 
 // Orden de prioridad 1 -> Busquedas
 app.query = query

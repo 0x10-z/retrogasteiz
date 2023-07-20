@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://retrogasteiz:8080/api'
+const API_BASE_URL = '/api'
 
 const apiService = {
   fetchImages: async (page = 1) => {
@@ -14,11 +14,12 @@ const apiService = {
 
   fetchImageById: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/images/${id}`)
-      const data = await response.json()
-      return data
+      const url = `${API_BASE_URL}/images/${id}`
+      const response = await fetch(url)
+      const { page, image } = await response.json()
+      return { page: page, image: image }
     } catch (error) {
-      console.error(`Error al recuperar la imagen con el id ${id}:`, error)
+      console.error(`Error retrieving image with ID ${id}:`, error)
       return []
     }
   },
