@@ -41,7 +41,7 @@ const database = {
       throw new Error('Error al descargar el archivo')
     }
 
-    const totalLength = 40000000
+    const totalLength = 60000000
     let receivedLength = 0
     const chunks = []
 
