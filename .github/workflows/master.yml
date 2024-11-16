@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       docker:
-        image: docker:23.0-dind
+        image: docker:27.0-dind
     steps:
       - uses: actions/checkout@v3
       - name: Build the Docker image
