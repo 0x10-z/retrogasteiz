@@ -17,6 +17,7 @@
     "singleQuote": true
   },
   "scripts": {
+    "build": "cp httpdocs/retrogasteiz/index.html index.html",
     "retrogasteiz": "cp httpdocs/retrogasteiz/index.html index.html && PROJECT=retrogasteiz npm run serve",
     "retro-debug": "cp httpdocs/retrogasteiz/index.html index.html && PROJECT=retro-debug npm run serve",
     "serve": "live-server --host=${PROJECT} --entry-file=${PROJECT}/index.html httpdocs"
