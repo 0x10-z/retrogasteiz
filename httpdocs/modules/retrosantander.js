@@ -35,7 +35,7 @@ const escape = (string) =>
         '>': '&gt;',
         "'": '&#39;',
         '"': '&quot;',
-      }[tag])
+      })[tag],
   )
 
 // Tokeniza una cadena. Véase https://es.stackoverflow.com/a/62032.
@@ -46,7 +46,7 @@ const normalize = (string) => {
     .normalize('NFD')
     .replace(
       /([^n\u0300-\u036f]|n(?!\u0303(?![\u0300-\u036f])))[\u0300-\u036f]+/gi,
-      '$1'
+      '$1',
     )
     .normalize()
     .replace(/[^a-z0-9ñç ]/g, ' ')
@@ -192,7 +192,10 @@ const app = {
 }
 
 const { hostname } = document.location
-const [project] = document.location.hostname.split('.')
+const parts = document.location.hostname.split('.')
+
+// Extrae el proyecto, ignorando 'www' al principio
+let project = parts[0] === 'www' ? parts[1] : parts[0]
 
 if (!projects[project]) {
   throw new Error(`No hay ningún proyecto asociado a ${hostname}.`)
