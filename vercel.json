@@ -1,4 +1,14 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "httpdocs"
+  "outputDirectory": "httpdocs",
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/retrogasteiz/index.html"
+    },
+    {
+      "source": "/((?!retrogasteiz|modules|retro-debug).*)",
+      "destination": "/retrogasteiz/index.html"
+    }
+  ]
 }
