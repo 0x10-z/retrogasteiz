@@ -1,10 +1,4 @@
 {
-  "public": "httpdocs",
-  "framework": "static",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/retrogasteiz/index.html"
-    }
-  ]
+  "buildCommand": "npm run build",
+  "outputDirectory": "httpdocs"
 }
