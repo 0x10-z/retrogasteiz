@@ -10,16 +10,17 @@ import {
   download,
 } from './icons.js'
 
+const blobStorageBaseUrl =
+  'https://cronolyprodstor.blob.core.windows.net/retrogasteiz'
+
 const projects = {
   retrogasteiz: {
     name: 'Retrogasteiz',
     database: '/retrogasteiz/arabaartxiboa_1.json',
     placeholder: (count) =>
       `Explora ${count} imágenes históricas del Archivo de Álava`,
-    image: (id) =>
-      `https://retrogasteiz.blob.core.windows.net/retrogasteiz/webp/${id}.webp`,
-    details: (id) =>
-      `https://retrogasteiz.blob.core.windows.net/retrogasteiz/rekognition/${id}.json`,
+    image: (id) => `${blobStorageBaseUrl}/webp/${id}.webp`,
+    details: (id) => `${blobStorageBaseUrl}/rekognition/${id}.json`,
     about: '/retrogasteiz/about.html',
     help: '/retrogasteiz/help.html',
     panel: (details) => `
@@ -71,10 +72,8 @@ const projects = {
     database: '/retrogasteiz/arabaartxiboa_1_debug.json',
     placeholder: (count) =>
       `Explora ${count} imágenes históricas del Archivo de Álava`,
-    image: (id) =>
-      `https://retrogasteiz.blob.core.windows.net/retrogasteiz/debug/${id}.webp`,
-    details: (id) =>
-      `https://retrogasteiz.blob.core.windows.net/retrogasteiz/debug/mock.json`,
+    image: (id) => `${blobStorageBaseUrl}/debug/${id}.webp`,
+    details: (id) => `${blobStorageBaseUrl}/debug/mock.json`,
     about: '/retrogasteiz/about.html',
     help: '/retrogasteiz/help.html',
     panel: (details) => `
